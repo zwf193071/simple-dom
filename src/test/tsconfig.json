@@ -1,0 +1,20 @@
+{
+  "extends": "tsconfigs/browser-executable",
+  "references": [
+    { "path": "../package/tsconfig.json" }
+  ],
+  "compilerOptions": {
+    "types": [
+      "mocha"
+    ],
+    "strictFunctionTypes": false,
+    "target": "ES2015",
+    "outDir": "../../build/test",
+    "jsx": "react",
+    "jsxFactory": "jsx"
+  },
+  "files": [
+    "benchmark/core.ts",
+    "unit/jsx.tsx"
+  ]
+}

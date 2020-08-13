@@ -1,0 +1,97 @@
+{
+  "name": "simple-dom",
+  "version": "1.0.0",
+  "description": "A simple virtual DOM",
+  "type": "module",
+  "exports": {
+    "./init": "./build/package/init.js",
+    "./h": "./build/package/h.js",
+    "./jsx": "./build/package/jsx.js"
+  },
+  "devDependencies": {
+    "@babel/core": "7.11.1",
+    "@babel/preset-env": "7.11.0",
+    "@commitlint/cli": "9.1.1",
+    "@commitlint/config-conventional": "9.1.1",
+    "@commitlint/travis-cli": "9.1.1",
+    "@types/chai": "4.2.12",
+    "@types/faker": "4.1.12",
+    "@types/lodash.shuffle": "4.2.6",
+    "@types/mathjs": "6.0.5",
+    "@types/mocha": "8.0.1",
+    "@typescript-eslint/eslint-plugin": "3.9.0",
+    "babel-loader": "8.1.0",
+    "chai": "4.2.0",
+    "chalk": "4.1.0",
+    "core-js": "3.6.5",
+    "cross-env": "7.0.2",
+    "editorconfig-checker": "3.1.0",
+    "eslint": "7.6.0",
+    "eslint-config-standard-with-typescript": "18.0.2",
+    "eslint-plugin-import": "2.22.0",
+    "eslint-plugin-markdown": "2.0.0-alpha.0",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-standard": "4.0.1",
+    "is-path-inside": "^3.0.2",
+    "karma": "5.1.1",
+    "karma-browserstack-launcher": "1.6.0",
+    "karma-chrome-launcher": "3.1.0",
+    "karma-firefox-launcher": "1.3.0",
+    "karma-mocha": "2.0.1",
+    "karma-mocha-reporter": "2.2.5",
+    "karma-webpack": "^4.0.2",
+    "mathjs": "7.1.0",
+    "meow": "7.1.0",
+    "mocha": "8.0.1",
+    "ts-transform-import-path-rewrite": "^0.2.1",
+    "tsconfigs": "^5.0.0",
+    "ttypescript": "^1.5.10",
+    "typescript": "3.9.7",
+    "webpack": "^4.44.1"
+  },
+  "scripts": {
+    "lint:js": "eslint --ext .ts,.tsx,.cjs,.md,.mjs --ignore-path .gitignore .",
+    "lint:editorconfig": "editorconfig-checker",
+    "lint": "run-s lint:editorconfig lint:js",
+    "unit": "cross-env FILES_PATTERN=\"build/test/unit/**/*.js\" karma start karma.conf.cjs",
+    "test": "run-s lint compile unit",
+    "compile": "ttsc --build src/test/tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zwf193071/snabbdom.git"
+  },
+  "keywords": [
+    "virtual",
+    "dom"
+  ],
+  "author": "Lucy Zhu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zwf193071/simple-dom/issues"
+  },
+  "homepage": "https://github.com/zwf193071/simple-dom#readme",
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint --config commitlint.config.json -E HUSKY_GIT_PARAMS",
+      "pre-commit": "run-s docs check-clean test"
+    }
+  },
+  "files": [
+    "/build/package/h.d.ts",
+    "/build/package/h.js",
+    "/build/package/h.js.map",
+    "/build/package/init.d.ts",
+    "/build/package/init.js",
+    "/build/package/init.js.map",
+    "/build/package/jsx-global.d.ts",
+    "/build/package/jsx.d.ts",
+    "/build/package/jsx.js",
+    "/build/package/jsx.js.map",
+    "/src/package/h.ts",
+    "/src/package/init.ts",
+    "/src/package/jsx-global.ts",
+    "/src/package/jsx.ts"
+  ]
+}
