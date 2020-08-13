@@ -19,8 +19,15 @@ The simple Virtual Dom which includes vnode & h & patch and so on.
   以下是我在实际开发中所搜集到的知识点，希望对大家有所帮助。
 
   ### ttypescript
-  `Currently TypeScript doesn't support custom transformers in the tsconfig.json, but supports it programmatically.`
   
+  ```
+  Currently TypeScript doesn't support custom transformers in the tsconfig.json, but supports it programmatically.
+
+  And there is no way to compile your files using custom transformers using tsc command.
+
+  TTypescript (Transformer TypeScript) solves this problem by patching on the fly the compile module to use transformers from tsconfig.json.
+  ```
+
   这是`ttypescript`出来的初衷，为了方便根据配置文件进行自定义编译。`package.json`内有一条`compile`脚本，执行`npm run compile`会运行`ttsc`命令，再根据`src/test/tsconfig.json`里的配置文件输出到build文件夹下
 
 ## Thanks to
