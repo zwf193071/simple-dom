@@ -1,2 +1,2 @@
-describe('core benchmark', () => {
-})
+// describe('core benchmark', () => {
+// })

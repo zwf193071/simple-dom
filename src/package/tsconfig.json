@@ -20,6 +20,7 @@
   "files": [
     "h.ts",
     "init.ts",
+    "is.ts",
     "jsx-global.ts",
     "jsx.ts",
     "modules/attributes.ts",

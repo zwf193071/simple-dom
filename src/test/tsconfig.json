@@ -15,6 +15,7 @@
   },
   "files": [
     "benchmark/core.ts",
+    "unit/core.ts",
     "unit/jsx.tsx"
   ]
 }
