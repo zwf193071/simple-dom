@@ -19,12 +19,15 @@
   },
   "files": [
     "h.ts",
+    "hooks.ts",
+    "htmldomapi.ts",
     "init.ts",
     "is.ts",
     "jsx-global.ts",
     "jsx.ts",
     "modules/attributes.ts",
     "modules/class.ts",
+    "modules/module.ts",
     "modules/props.ts",
     "modules/style.ts",
     "vnode.ts"
