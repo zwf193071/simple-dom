@@ -1,4 +1,4 @@
-@[toc]
+[toc]
 # simple-dom
 
 The simple Virtual Dom which includes vnode & h & patch and so on.
@@ -104,10 +104,12 @@ The simple Virtual Dom which includes vnode & h & patch and so on.
  ```
 `Sdom`从某种意义上来讲，便是上面的`h`，上面的代码会在浏览器界面生成ul标签，如下图所示：
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200814161105380.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3p3ZjE5MzA3MQ==,size_16,color_FFFFFF,t_70#pic_center)
+
 `h`函数易于理解，这里我便不再赘述了，在`Virtual Dom`里，`patch`才是重点，因其实现了`diff`算法，下面会根据测试例子一一剖析源码。
 ### patch
 #### 新旧节点是否有一样的tagName
 通过测试案例，为大家一步一步讲解源码原理
+
 在`test/unit`文件夹下的`core.ts`里新增以下代码：
 
 ```javascript
@@ -129,7 +131,8 @@ describe('simpledom', function () {
 	 });
 });  
 ```
-patch函数的作用是，比较新旧vnode节点的差异，重新生成一个vode节点
+patch函数的作用是，比较新旧vnode节点的差异，对新vnode做处理后，返回新vnode
+
 为了实现测试代码的功能，首先，我们需要在`src/package`目录下新建`init.ts`文件
 
 ```javascript
@@ -174,7 +177,8 @@ function sameVnode(vnode1: VNode, vnode2: VNode): boolean {
 }
 ```
 由于新旧节点的key皆没有定义，为`undefined`，`sel`值皆为`div`，故上面等式相等
-为实现patch后返回的节点有elm属性，需再`patchVnode`里进行进一步操作
+
+为实现patch后返回的节点有elm属性，需在`patchVnode`里进行下一步操作
 
 ```javascript
 function patchVnode(oldVnode: VNode, vnode: VNode) {
@@ -183,6 +187,7 @@ function patchVnode(oldVnode: VNode, vnode: VNode) {
 }
 ```
 实现`assert.strictEqual(elm.tagName, 'DIV')`这个功能，`patchVnode`里只需上面这一行代码即可
+
 注意：`tagName`是dom元素的属性
 
 #### 新旧节点是否有不同的tag和id
@@ -247,7 +252,7 @@ it('has different tag and id', function () {
         return vnode.elm
     }
 ```
-之后进行下一步，在`oldVnode.elm`的兄妹节点(`null`)前插入`vnode.elm`，`removeVnodes`是移除`parent`里面的旧节点，这两步操作之后，`parent`变为`<div><span id="id"></span></div>`，在patch函数返回新vnode即可。
+之后进行下一步，在`oldVnode.elm`的兄妹节点(`null`)前插入`vnode.elm`，`removeVnodes`是移除`parent`里面的旧节点，这两步操作之后，`parent`变为`<div><span id="id"></span></div>`，再patch函数返回新vnode即可。
 #### 新节点的子元素是否有id
 测试代码如下：
 

@@ -77,20 +77,23 @@ export function init(domApi?: DOMAPI) {
         if (sel !== undefined) {
             // Parse selector
             const hashIdx = sel.indexOf('#')
+            const dotIdx = sel.indexOf('.', hashIdx)
             const hash = hashIdx > 0 ? hashIdx : sel.length
-            const tag = hashIdx !== -1 ? sel.slice(0, hash) : sel
+            const dot = dotIdx > 0 ? dotIdx : sel.length
+            const tag = hashIdx !== -1 || dotIdx !== -1 ? sel.slice(0, Math.min(hash, dot)) : sel
             const elm = vnode.elm = isDef(data) && isDef(i = data.ns)
                 ? api.createElementNS(i, tag)
                 : api.createElement(tag)
-            elm.setAttribute('id', sel.slice(hash + 1, sel.length))
-            // if (is.array(children)) {
-            //     for (i = 0; i < children.length; ++i) {
-            //         const ch = children[i]
-            //         if (ch != null) {
-            //             api.appendChild(elm, createElm(ch as VNode))
-            //         }
-            //     }
-            // }
+            if (hash < dot) elm.setAttribute('id', sel.slice(hash + 1, dot))
+            if (dotIdx > 0) elm.setAttribute('class', sel.slice(dot + 1).replace(/\./g, ' '))
+            if (is.array(children)) {
+                for (i = 0; i < children.length; ++i) {
+                    const ch = children[i]
+                    if (ch != null) {
+                        api.appendChild(elm, createElm(ch as VNode))
+                    }
+                }
+            }
         } else {
             vnode.elm = api.createTextNode(vnode.text!)
         }
@@ -145,6 +148,8 @@ export function init(domApi?: DOMAPI) {
             if (isDef(ch)) {
                 addVnodes(elm, null, ch, 0, ch.length - 1)
             }
+        } else if (oldVnode.text !== vnode.text) {
+            api.setTextContent(elm, vnode.text!)
         }
         // hook?.postpatch?.(oldVnode, vnode)
     }
@@ -160,7 +165,6 @@ export function init(domApi?: DOMAPI) {
             parent = api.parentNode(elm) as Node
             
             createElm(vnode)
-            console.log(222)
             if (parent !== null) {
                 api.insertBefore(parent, vnode.elm!, api.nextSibling(elm))
                 removeVnodes(parent, [oldVnode], 0, 0)

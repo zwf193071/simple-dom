@@ -54,5 +54,36 @@ describe('simpledom', function () {
         //     elm = patch(vnode0, h('div', [h('div#unique')])).elm
         //     assert.strictEqual(elm.firstChild.id, 'unique')
         // });
+        // it('has correct namespace', function () {
+        //     var SVGNamespace = 'http://www.w3.org/2000/svg'
+        //     var XHTMLNamespace = 'http://www.w3.org/1999/xhtml'
+
+        //     elm = patch(vnode0, h('div', [h('div', { ns: SVGNamespace })])).elm
+        //     assert.strictEqual(elm.firstChild.namespaceURI, SVGNamespace)
+
+        //     // verify that svg tag automatically gets svg namespace
+        //     elm = patch(vnode0, h('svg', [
+        //         h('foreignObject', [
+        //             h('div', ['I am HTML embedded in SVG'])
+        //         ])
+        //     ])).elm
+        //     assert.strictEqual(elm.namespaceURI, SVGNamespace)
+        //     assert.strictEqual(elm.firstChild.namespaceURI, SVGNamespace)
+        //     assert.strictEqual(elm.firstChild.firstChild.namespaceURI, XHTMLNamespace)
+
+        //     // verify that svg tag with extra selectors gets svg namespace
+        //     elm = patch(vnode0, h('svg#some-id')).elm
+        //     assert.strictEqual(elm.namespaceURI, SVGNamespace)
+
+        //     // verify that non-svg tag beginning with 'svg' does NOT get namespace
+        //     elm = patch(vnode0, h('svg-custom-el')).elm
+        //     assert.notStrictEqual(elm.namespaceURI, SVGNamespace)
+        // })
+        it('receives classes in selector', function () {
+            elm = patch(vnode0, h('div', [h('i.am.a.class')])).elm
+            assert(elm.firstChild.classList.contains('am'))
+            assert(elm.firstChild.classList.contains('a'))
+            assert(elm.firstChild.classList.contains('class'))
+        })
     });
 });
