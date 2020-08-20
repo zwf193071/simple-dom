@@ -1,4 +1,22 @@
-[toc]
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [simple-dom](#simple-dom)
+  - [Preface](#preface)
+  - [Documentation](#documentation)
+    - [ttypescript](#ttypescript)
+    - [h](#h)
+    - [patch](#patch)
+      - [新旧节点是否有一样的tagName](#%E6%96%B0%E6%97%A7%E8%8A%82%E7%82%B9%E6%98%AF%E5%90%A6%E6%9C%89%E4%B8%80%E6%A0%B7%E7%9A%84tagname)
+      - [新旧节点是否有不同的tag和id](#%E6%96%B0%E6%97%A7%E8%8A%82%E7%82%B9%E6%98%AF%E5%90%A6%E6%9C%89%E4%B8%8D%E5%90%8C%E7%9A%84tag%E5%92%8Cid)
+      - [新节点的子元素是否有id](#%E6%96%B0%E8%8A%82%E7%82%B9%E7%9A%84%E5%AD%90%E5%85%83%E7%B4%A0%E6%98%AF%E5%90%A6%E6%9C%89id)
+    - [个人项目地址](#%E4%B8%AA%E4%BA%BA%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80)
+  - [Thanks to](#thanks-to)
+  - [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # simple-dom
 
 The simple Virtual Dom which includes vnode & h & patch and so on.
