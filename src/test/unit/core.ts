@@ -85,5 +85,12 @@ describe('simpledom', function () {
             assert(elm.firstChild.classList.contains('a'))
             assert(elm.firstChild.classList.contains('class'))
         })
+        it('receives classes in class property', function () {
+            elm = patch(vnode0, h('i', { class: { am: true, a: true, class: true, not: false } })).elm
+            assert(elm.classList.contains('am'))
+            assert(elm.classList.contains('a'))
+            assert(elm.classList.contains('class'))
+            assert(!elm.classList.contains('not'))
+        })
     });
 });
