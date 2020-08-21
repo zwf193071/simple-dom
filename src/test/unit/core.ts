@@ -97,5 +97,9 @@ describe('simpledom', function () {
             assert(elm.firstChild.classList.contains('has'))
             assert(elm.firstChild.classList.contains('classes'))
         })
+        it('can create elements with text content', function () {
+            elm = patch(vnode0, h('div', ['I am a string'])).elm
+            assert.strictEqual(elm.innerHTML, 'I am a string')
+        })
     });
 });
