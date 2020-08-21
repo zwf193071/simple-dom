@@ -92,5 +92,10 @@ describe('simpledom', function () {
             assert(elm.classList.contains('class'))
             assert(!elm.classList.contains('not'))
         })
+        it('handles classes from both selector and property', function () {
+            elm = patch(vnode0, h('div', [h('i.has', { class: { classes: true } })])).elm
+            assert(elm.firstChild.classList.contains('has'))
+            assert(elm.firstChild.classList.contains('classes'))
+        })
     });
 });
