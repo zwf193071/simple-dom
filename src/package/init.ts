@@ -30,7 +30,7 @@ type ArraysOf<T> = {
 type ModuleHooks = ArraysOf<Required<Module>>
 
 const hooks: Array<keyof Module> = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
-export function init(domApi?: DOMAPI) {
+export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
     let i: number
     let j: number
     const cbs: ModuleHooks = {
@@ -43,15 +43,15 @@ export function init(domApi?: DOMAPI) {
     }
     const api: DOMAPI = domApi !== undefined ? domApi : htmlDomApi
 
-    // for (i = 0; i < hooks.length; ++i) {
-    //     cbs[hooks[i]] = []
-    //     for (j = 0; j < modules.length; ++j) {
-    //         const hook = modules[j][hooks[i]]
-    //         if (hook !== undefined) {
-    //             (cbs[hooks[i]] as any[]).push(hook)
-    //         }
-    //     }
-    // }
+    for (i = 0; i < hooks.length; ++i) {
+        cbs[hooks[i]] = []
+        for (j = 0; j < modules.length; ++j) {
+            const hook = modules[j][hooks[i]]
+            if (hook !== undefined) {
+                (cbs[hooks[i]] as any[]).push(hook)
+            }
+        }
+    }
 
     function emptyNodeAt(elm: Element) {
         const id = elm.id ? '#' + elm.id : ''
@@ -72,8 +72,6 @@ export function init(domApi?: DOMAPI) {
         let data = vnode.data
         const children = vnode.children
         const sel = vnode.sel
-        console.log('vnode')
-        console.log(vnode)
         if (sel !== undefined) {
             // Parse selector
             const hashIdx = sel.indexOf('#')
@@ -86,6 +84,7 @@ export function init(domApi?: DOMAPI) {
                 : api.createElement(tag)
             if (hash < dot) elm.setAttribute('id', sel.slice(hash + 1, dot))
             if (dotIdx > 0) elm.setAttribute('class', sel.slice(dot + 1).replace(/\./g, ' '))
+            for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode)
             if (is.array(children)) {
                 for (i = 0; i < children.length; ++i) {
                     const ch = children[i]
@@ -122,8 +121,6 @@ export function init(domApi?: DOMAPI) {
             const ch = vnodes[startIdx]
             if (ch != null) {
                 if (isDef(ch.sel)) {
-                    console.log('cbs')
-                    console.log(cbs)
                     listeners = cbs.remove.length + 1
                     createRmCb(ch.elm!, listeners)()
                     // for (let i = 0; i < cbs.remove.length; ++i) cbs.remove[i](ch, rm)
@@ -144,6 +141,10 @@ export function init(domApi?: DOMAPI) {
         // hook?.prepatch?.(oldVnode, vnode)
         const elm = vnode.elm = oldVnode.elm!
         const ch = vnode.children as VNode[]
+        if (oldVnode === vnode) return
+        if (vnode.data !== undefined) {
+            for (let i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+        }
         if (isUndef(vnode.text)) {
             if (isDef(ch)) {
                 addVnodes(elm, null, ch, 0, ch.length - 1)
