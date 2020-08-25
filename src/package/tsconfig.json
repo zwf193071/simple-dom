@@ -30,6 +30,7 @@
     "modules/module.ts",
     "modules/props.ts",
     "modules/style.ts",
+    "tovnode.ts",
     "vnode.ts"
   ]
 }

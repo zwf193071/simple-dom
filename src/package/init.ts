@@ -23,6 +23,8 @@ function sameVnode(vnode1: VNode, vnode2: VNode): boolean {
 function isVnode(vnode: any): vnode is VNode {
     return vnode.sel !== undefined
 }
+type KeyToIndexMap = { [key: string]: number }
+
 type ArraysOf<T> = {
     [K in keyof T]: Array<T[K]>;
 }
@@ -72,7 +74,12 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
         let data = vnode.data
         const children = vnode.children
         const sel = vnode.sel
-        if (sel !== undefined) {
+        if (sel === '!') {
+            if (isUndef(vnode.text)) {
+                vnode.text = ''
+            }
+            vnode.elm = api.createComment(vnode.text!)
+        } else if (sel !== undefined) {
             // Parse selector
             const hashIdx = sel.indexOf('#')
             const dotIdx = sel.indexOf('.', hashIdx)
@@ -136,17 +143,76 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
             }
         }
     }
+    function updateChildren(parentElm: Node,
+        oldCh: VNode[],
+        newCh: VNode[]) {
+        let oldStartIdx = 0
+        let newStartIdx = 0
+        let oldEndIdx = oldCh.length - 1
+        let oldStartVnode = oldCh[0]
+        let oldEndVnode = oldCh[oldEndIdx]
+        let newEndIdx = newCh.length - 1
+        let newStartVnode = newCh[0]
+        let newEndVnode = newCh[newEndIdx]
+        let oldKeyToIdx: KeyToIndexMap | undefined
+        let idxInOld: number
+        let elmToMove: VNode
+        let before: any
+        while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+            if (oldStartVnode == null) {
+                oldStartVnode = oldCh[++oldStartIdx] // Vnode might have been moved left
+            } else if (oldEndVnode == null) {
+                oldEndVnode = oldCh[--oldEndIdx]
+            } else if (newStartVnode == null) {
+                newStartVnode = newCh[++newStartIdx]
+            } else if (newEndVnode == null) {
+                newEndVnode = newCh[--newEndIdx]
+            } else if (sameVnode(oldStartVnode, newStartVnode)) {
+                patchVnode(oldStartVnode, newStartVnode)
+                oldStartVnode = oldCh[++oldStartIdx]
+                newStartVnode = newCh[++newStartIdx]
+            } else if (sameVnode(oldEndVnode, newEndVnode)) {
+                patchVnode(oldEndVnode, newEndVnode)
+                oldEndVnode = oldCh[--oldEndIdx]
+                newEndVnode = newCh[--newEndIdx]
+            } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+                patchVnode(oldStartVnode, newEndVnode)
+                api.insertBefore(parentElm, oldStartVnode.elm!, api.nextSibling(oldEndVnode.elm!))
+                oldStartVnode = oldCh[++oldStartIdx]
+                newEndVnode = newCh[--newEndIdx]
+            } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+                patchVnode(oldEndVnode, newStartVnode)
+                api.insertBefore(parentElm, oldEndVnode.elm!, oldStartVnode.elm!)
+                oldEndVnode = oldCh[--oldEndIdx]
+                newStartVnode = newCh[++newStartIdx]
+            } else {
+                console.log('test1111111')
+            }
+        }
+        if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+            if (oldStartIdx > oldEndIdx) {
+                before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm
+                addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx)
+            } else {
+                removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
+            }
+        }
+
+    }
     function patchVnode(oldVnode: VNode, vnode: VNode) {
         // const hook = vnode.data?.hook
         // hook?.prepatch?.(oldVnode, vnode)
         const elm = vnode.elm = oldVnode.elm!
+        const oldCh = oldVnode.children as VNode[]
         const ch = vnode.children as VNode[]
         if (oldVnode === vnode) return
         if (vnode.data !== undefined) {
             for (let i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
         }
         if (isUndef(vnode.text)) {
-            if (isDef(ch)) {
+            if (isDef(oldCh) && isDef(ch)) {
+                if (oldCh !== ch) updateChildren(elm, oldCh, ch)
+            } else if (isDef(ch)) {
                 addVnodes(elm, null, ch, 0, ch.length - 1)
             }
         } else if (oldVnode.text !== vnode.text) {
