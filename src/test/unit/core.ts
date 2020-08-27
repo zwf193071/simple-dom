@@ -360,70 +360,70 @@ describe('simpledom', function () {
                 assert.strictEqual(elm.childNodes[0].childNodes[0].tagName, 'SPAN')
                 assert.strictEqual(elm.childNodes[0].childNodes[0].textContent, 'Hi')
             })
-            // it('can remove some children of the root element', function () {
-            //     var h2 = document.createElement('h2')
-            //     h2.textContent = 'Hello'
-            //     var prevElm = document.createElement('div')
-            //     prevElm.id = 'id'
-            //     prevElm.className = 'class'
-            //     var text = document.createTextNode('Foobar')
-            //     const reference = {};
-            //     (text as any).testProperty = reference // ensures we dont recreate the Text Node
-            //     prevElm.appendChild(text)
-            //     prevElm.appendChild(h2)
-            //     var nextVNode = h('div#id.class', ['Foobar'])
-            //     elm = patch(toVNode(prevElm), nextVNode).elm
-            //     assert.strictEqual(elm, prevElm)
-            //     assert.strictEqual(elm.tagName, 'DIV')
-            //     assert.strictEqual(elm.id, 'id')
-            //     assert.strictEqual(elm.className, 'class')
-            //     assert.strictEqual(elm.childNodes.length, 1)
-            //     assert.strictEqual(elm.childNodes[0].nodeType, 3)
-            //     assert.strictEqual(elm.childNodes[0].wholeText, 'Foobar')
-            //     assert.strictEqual(elm.childNodes[0].testProperty, reference)
-            // })
-            // it('can remove text elements', function () {
-            //     var h2 = document.createElement('h2')
-            //     h2.textContent = 'Hello'
-            //     var prevElm = document.createElement('div')
-            //     prevElm.id = 'id'
-            //     prevElm.className = 'class'
-            //     var text = document.createTextNode('Foobar')
-            //     prevElm.appendChild(text)
-            //     prevElm.appendChild(h2)
-            //     var nextVNode = h('div#id.class', [h('h2', 'Hello')])
-            //     elm = patch(toVNode(prevElm), nextVNode).elm
-            //     assert.strictEqual(elm, prevElm)
-            //     assert.strictEqual(elm.tagName, 'DIV')
-            //     assert.strictEqual(elm.id, 'id')
-            //     assert.strictEqual(elm.className, 'class')
-            //     assert.strictEqual(elm.childNodes.length, 1)
-            //     assert.strictEqual(elm.childNodes[0].nodeType, 1)
-            //     assert.strictEqual(elm.childNodes[0].textContent, 'Hello')
-            // })
-            // it('can work with domApi', function () {
-            //     var domApi = {
-            //         ...htmlDomApi,
-            //         tagName: function (elm: HTMLElement) { return 'x-' + elm.tagName.toUpperCase() }
-            //     }
-            //     var h2 = document.createElement('h2')
-            //     h2.id = 'hx'
-            //     h2.setAttribute('data-env', 'xyz')
-            //     var text = document.createTextNode('Foobar')
-            //     var elm = document.createElement('div')
-            //     elm.id = 'id'
-            //     elm.className = 'class other'
-            //     elm.setAttribute('data', 'value')
-            //     elm.appendChild(h2)
-            //     elm.appendChild(text)
-            //     var vnode = toVNode(elm, domApi)
-            //     assert.strictEqual(vnode.sel, 'x-div#id.class.other')
-            //     assert.deepEqual(vnode.data, { attrs: { data: 'value' } })
-            //     const children = vnode.children as [VNode, VNode]
-            //     assert.strictEqual(children[0].sel, 'x-h2#hx')
-            //     assert.deepEqual(children[0].data, { attrs: { 'data-env': 'xyz' } })
-            //     assert.strictEqual(children[1].text, 'Foobar')
-            // })
+            it('can remove some children of the root element', function () {
+                var h2 = document.createElement('h2')
+                h2.textContent = 'Hello'
+                var prevElm = document.createElement('div')
+                prevElm.id = 'id'
+                prevElm.className = 'class'
+                var text = document.createTextNode('Foobar')
+                const reference = {};
+                (text as any).testProperty = reference // ensures we dont recreate the Text Node
+                prevElm.appendChild(text)
+                prevElm.appendChild(h2)
+                var nextVNode = h('div#id.class', ['Foobar'])
+                elm = patch(toVNode(prevElm), nextVNode).elm
+                assert.strictEqual(elm, prevElm)
+                assert.strictEqual(elm.tagName, 'DIV')
+                assert.strictEqual(elm.id, 'id')
+                assert.strictEqual(elm.className, 'class')
+                assert.strictEqual(elm.childNodes.length, 1)
+                assert.strictEqual(elm.childNodes[0].nodeType, 3)
+                assert.strictEqual(elm.childNodes[0].wholeText, 'Foobar')
+                assert.strictEqual(elm.childNodes[0].testProperty, reference)
+            })
+            it('can remove text elements', function () {
+                var h2 = document.createElement('h2')
+                h2.textContent = 'Hello'
+                var prevElm = document.createElement('div')
+                prevElm.id = 'id'
+                prevElm.className = 'class'
+                var text = document.createTextNode('Foobar')
+                prevElm.appendChild(text)
+                prevElm.appendChild(h2)
+                var nextVNode = h('div#id.class', [h('h2', 'Hello')])
+                elm = patch(toVNode(prevElm), nextVNode).elm
+                assert.strictEqual(elm, prevElm)
+                assert.strictEqual(elm.tagName, 'DIV')
+                assert.strictEqual(elm.id, 'id')
+                assert.strictEqual(elm.className, 'class')
+                assert.strictEqual(elm.childNodes.length, 1)
+                assert.strictEqual(elm.childNodes[0].nodeType, 1)
+                assert.strictEqual(elm.childNodes[0].textContent, 'Hello')
+            })
+            it('can work with domApi', function () {
+                var domApi = {
+                    ...htmlDomApi,
+                    tagName: function (elm: HTMLElement) { return 'x-' + elm.tagName.toUpperCase() }
+                }
+                var h2 = document.createElement('h2')
+                h2.id = 'hx'
+                h2.setAttribute('data-env', 'xyz')
+                var text = document.createTextNode('Foobar')
+                var elm = document.createElement('div')
+                elm.id = 'id'
+                elm.className = 'class other'
+                elm.setAttribute('data', 'value')
+                elm.appendChild(h2)
+                elm.appendChild(text)
+                var vnode = toVNode(elm, domApi)
+                assert.strictEqual(vnode.sel, 'x-div#id.class.other')
+                assert.deepEqual(vnode.data, { attrs: { data: 'value' } })
+                const children = vnode.children as [VNode, VNode]
+                assert.strictEqual(children[0].sel, 'x-h2#hx')
+                assert.deepEqual(children[0].data, { attrs: { 'data-env': 'xyz' } })
+                assert.strictEqual(children[1].text, 'Foobar')
+            })
         })
     })
 });

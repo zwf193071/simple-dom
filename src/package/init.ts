@@ -159,6 +159,10 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
                     // } else {
                     //     rm()
                     // }
+                } else { // Text node
+                    console.log('ch.elm')
+                    console.log(ch)
+                    api.removeChild(parentElm, ch.elm!)
                 }
             }
         }
@@ -211,13 +215,14 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
                     oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
                 }
                 idxInOld = oldKeyToIdx[newStartVnode.key as string]
-                if (isUndef(idxInOld)) { // New element
+                if (isUndef(idxInOld)) { // 若新节点没有key，则直接根据新节点生成dom元素，并插入到老节点原第一节点的前面
                     api.insertBefore(parentElm, createElm(newStartVnode), oldStartVnode.elm!)
                 } else {
                     elmToMove = oldCh[idxInOld]
-                    if (elmToMove.sel !== newStartVnode.sel) {
+                    if (elmToMove.sel !== newStartVnode.sel) { // 新节点若不在老节点队伍里面，则插入到老节点原第一节点的前面
                         api.insertBefore(parentElm, createElm(newStartVnode), oldStartVnode.elm!)
                     } else {
+                        // 新节点若在老节点队伍里面，则进行patchNode操作，并将该节点插入到老节点原第一节点的前面
                         patchVnode(elmToMove, newStartVnode)
                         oldCh[idxInOld] = undefined as any
                         api.insertBefore(parentElm, elmToMove.elm!, oldStartVnode.elm!)

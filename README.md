@@ -1,6 +1,6 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+**Table of Contents**
 
 - [simple-dom](#simple-dom)
   - [Preface](#preface)
@@ -11,6 +11,9 @@
       - [新旧节点是否有一样的tagName](#%E6%96%B0%E6%97%A7%E8%8A%82%E7%82%B9%E6%98%AF%E5%90%A6%E6%9C%89%E4%B8%80%E6%A0%B7%E7%9A%84tagname)
       - [新旧节点是否有不同的tag和id](#%E6%96%B0%E6%97%A7%E8%8A%82%E7%82%B9%E6%98%AF%E5%90%A6%E6%9C%89%E4%B8%8D%E5%90%8C%E7%9A%84tag%E5%92%8Cid)
       - [新节点的子元素是否有id](#%E6%96%B0%E8%8A%82%E7%82%B9%E7%9A%84%E5%AD%90%E5%85%83%E7%B4%A0%E6%98%AF%E5%90%A6%E6%9C%89id)
+      - [updateChildren(diff算法的最最最核心功能)](#updatechildrendiff%E7%AE%97%E6%B3%95%E7%9A%84%E6%9C%80%E6%9C%80%E6%9C%80%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD)
+        - [是否移除根节点下的老children节点](#%E6%98%AF%E5%90%A6%E7%A7%BB%E9%99%A4%E6%A0%B9%E8%8A%82%E7%82%B9%E4%B8%8B%E7%9A%84%E8%80%81children%E8%8A%82%E7%82%B9)
+        - [是否移除text元素](#%E6%98%AF%E5%90%A6%E7%A7%BB%E9%99%A4text%E5%85%83%E7%B4%A0)
     - [个人项目地址](#%E4%B8%AA%E4%BA%BA%E9%A1%B9%E7%9B%AE%E5%9C%B0%E5%9D%80)
   - [Thanks to](#thanks-to)
   - [License](#license)
@@ -312,6 +315,161 @@ it('has different tag and id', function () {
             }
         }
     }
+```
+
+#### updateChildren(diff算法的最最最核心功能)
+##### 是否移除根节点下的老children节点
+测试代码如下所示
+```
+it('can remove previous children of the root element', function () {
+    var h2 = document.createElement('h2')
+    h2.textContent = 'Hello'
+    var prevElm = document.createElement('div')
+    prevElm.id = 'id'
+    prevElm.className = 'class'
+    prevElm.appendChild(h2)
+    var nextVNode = h('div#id.class', [h('span', 'Hi')])
+    elm = patch(toVNode(prevElm), nextVNode).elm
+    assert.strictEqual(elm, prevElm)
+    assert.strictEqual(elm.tagName, 'DIV')
+    assert.strictEqual(elm.id, 'id')
+    assert.strictEqual(elm.className, 'class')
+    assert.strictEqual(elm.childNodes.length, 1)
+    assert.strictEqual(elm.childNodes[0].tagName, 'SPAN')
+    assert.strictEqual(elm.childNodes[0].textContent, 'Hi')
+})
+```
+该测试代码所测得功能是，把`<div id="id" class="class"><h2>Hello</h2></div>`用`toVNode`方法转成Vnode节点，接着与`nextVNode`进行`patch`比较。
+
+`patch(toVNode(prevElm), nextVNode).elm`这段代码生成的便是`<div id="id" class="class"><span>Hi</span></div>`
+
+根据上述代码分析，我们应修改`patchVnode`方法，新增代码如下
+```
+function patchVnode(oldVnode: VNode, vnode: VNode) {
+    ...
+    if (isUndef(vnode.text)) {
+        if (isDef(oldCh) && isDef(ch)) {
+            if (oldCh !== ch) updateChildren(elm, oldCh, ch)
+        }...
+    }
+    ...
+    
+}
+```
+`updateChildren`代码如下所示：
+```
+    function updateChildren(parentElm: Node,
+        oldCh: VNode[],
+        newCh: VNode[]) {
+        let oldStartIdx = 0
+        let newStartIdx = 0
+        let oldEndIdx = oldCh.length - 1
+        let oldStartVnode = oldCh[0]
+        let oldEndVnode = oldCh[oldEndIdx]
+        let newEndIdx = newCh.length - 1
+        let newStartVnode = newCh[0]
+        let newEndVnode = newCh[newEndIdx]
+        let oldKeyToIdx: KeyToIndexMap | undefined
+        let idxInOld: number
+        let elmToMove: VNode
+        let before: any
+
+        while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+            if (oldStartVnode == null) {
+                oldStartVnode = oldCh[++oldStartIdx] // Vnode might have been moved left
+            } else if (oldEndVnode == null) {
+                oldEndVnode = oldCh[--oldEndIdx]
+            } else if (newStartVnode == null) {
+                newStartVnode = newCh[++newStartIdx]
+            } else if (newEndVnode == null) {
+                newEndVnode = newCh[--newEndIdx]
+            } else if (sameVnode(oldStartVnode, newStartVnode)) {
+                patchVnode(oldStartVnode, newStartVnode)
+                oldStartVnode = oldCh[++oldStartIdx]
+                newStartVnode = newCh[++newStartIdx]
+            } else if (sameVnode(oldEndVnode, newEndVnode)) {
+                patchVnode(oldEndVnode, newEndVnode)
+                oldEndVnode = oldCh[--oldEndIdx]
+                newEndVnode = newCh[--newEndIdx]
+            } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+                patchVnode(oldStartVnode, newEndVnode)
+                api.insertBefore(parentElm, oldStartVnode.elm!, api.nextSibling(oldEndVnode.elm!))
+                oldStartVnode = oldCh[++oldStartIdx]
+                newEndVnode = newCh[--newEndIdx]
+            } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+                patchVnode(oldEndVnode, newStartVnode)
+                api.insertBefore(parentElm, oldEndVnode.elm!, oldStartVnode.elm!)
+                oldEndVnode = oldCh[--oldEndIdx]
+                newStartVnode = newCh[++newStartIdx]
+            } else {
+                if (oldKeyToIdx === undefined) {
+                    oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+                }
+                idxInOld = oldKeyToIdx[newStartVnode.key as string]
+                if (isUndef(idxInOld)) { // 若新节点没有key，则直接根据新节点生成dom元素，并插入到老节点原第一节点的前面
+                    api.insertBefore(parentElm, createElm(newStartVnode), oldStartVnode.elm!)
+                } else {
+                    elmToMove = oldCh[idxInOld]
+                    if (elmToMove.sel !== newStartVnode.sel) { // 新节点若不在老节点队伍里面，则插入到老节点原第一节点的前面
+                        api.insertBefore(parentElm, createElm(newStartVnode), oldStartVnode.elm!)
+                    } else {
+                        // 新节点若在老节点队伍里面，则进行patchNode操作，并将该节点插入到老节点原第一节点的前面
+                        patchVnode(elmToMove, newStartVnode)
+                        oldCh[idxInOld] = undefined as any
+                        api.insertBefore(parentElm, elmToMove.elm!, oldStartVnode.elm!)
+                    }
+                }
+                newStartVnode = newCh[++newStartIdx]
+            }
+        }
+        if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+            if (oldStartIdx > oldEndIdx) {
+                before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm
+                addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx)
+            } else {
+                removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
+            }
+        }
+    }
+```
+该方法有一篇博客分析的很好，感兴趣的同学可以[点击查看](https://blog.csdn.net/qq2276031/article/details/106407647)进一步明白原理。
+
+##### 是否移除text元素
+测试代码如下：
+```
+it('can remove text elements', function () {
+    var h2 = document.createElement('h2')
+    h2.textContent = 'Hello'
+    var prevElm = document.createElement('div')
+    prevElm.id = 'id'
+    prevElm.className = 'class'
+    var text = document.createTextNode('Foobar')
+    prevElm.appendChild(text)
+    prevElm.appendChild(h2)
+    var nextVNode = h('div#id.class', [h('h2', 'Hello')])
+    elm = patch(toVNode(prevElm), nextVNode).elm
+    assert.strictEqual(elm, prevElm)
+    assert.strictEqual(elm.tagName, 'DIV')
+    assert.strictEqual(elm.id, 'id')
+    assert.strictEqual(elm.className, 'class')
+    assert.strictEqual(elm.childNodes.length, 1)
+    assert.strictEqual(elm.childNodes[0].nodeType, 1)
+    assert.strictEqual(elm.childNodes[0].textContent, 'Hello')
+})
+```
+需要在原`removeVnodes`方法里添加一段代码
+```
+function removeVnodes(parentElm: Node,
+    vnodes: VNode[],
+    startIdx: number,
+    endIdx: number): void {
+        ...
+        if (isDef(ch.sel)) {
+            ...
+        } else { // Text node
+            api.removeChild(parentElm, ch.elm!) // text元素没有sel标签（如div,span）
+        }
+}
 ```
 
 ### 个人项目地址
