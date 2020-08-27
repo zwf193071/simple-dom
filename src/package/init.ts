@@ -31,6 +31,17 @@ type ArraysOf<T> = {
 
 type ModuleHooks = ArraysOf<Required<Module>>
 
+function createKeyToOldIdx(children: VNode[], beginIdx: number, endIdx: number): KeyToIndexMap {
+    const map: KeyToIndexMap = {}
+    for (let i = beginIdx; i <= endIdx; ++i) {
+        const key = children[i]?.key
+        if (key !== undefined) {
+            map[key] = i
+        }
+    }
+    return map
+}
+
 const hooks: Array<keyof Module> = ['create', 'update', 'remove', 'destroy', 'pre', 'post']
 export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
     let i: number
@@ -99,7 +110,16 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
                         api.appendChild(elm, createElm(ch as VNode))
                     }
                 }
+            } else if (is.primitive(vnode.text)) {
+                api.appendChild(elm, api.createTextNode(vnode.text))
             }
+            // const hook = vnode.data!.hook
+            // if (isDef(hook)) {
+            //     hook.create?.(emptyNode, vnode)
+            //     if (hook.insert) {
+            //         insertedVnodeQueue.push(vnode)
+            //     }
+            // }
         } else {
             vnode.elm = api.createTextNode(vnode.text!)
         }
@@ -158,6 +178,7 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
         let idxInOld: number
         let elmToMove: VNode
         let before: any
+
         while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
             if (oldStartVnode == null) {
                 oldStartVnode = oldCh[++oldStartIdx] // Vnode might have been moved left
@@ -186,7 +207,23 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
                 oldEndVnode = oldCh[--oldEndIdx]
                 newStartVnode = newCh[++newStartIdx]
             } else {
-                console.log('test1111111')
+                if (oldKeyToIdx === undefined) {
+                    oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+                }
+                idxInOld = oldKeyToIdx[newStartVnode.key as string]
+                if (isUndef(idxInOld)) { // New element
+                    api.insertBefore(parentElm, createElm(newStartVnode), oldStartVnode.elm!)
+                } else {
+                    elmToMove = oldCh[idxInOld]
+                    if (elmToMove.sel !== newStartVnode.sel) {
+                        api.insertBefore(parentElm, createElm(newStartVnode), oldStartVnode.elm!)
+                    } else {
+                        patchVnode(elmToMove, newStartVnode)
+                        oldCh[idxInOld] = undefined as any
+                        api.insertBefore(parentElm, elmToMove.elm!, oldStartVnode.elm!)
+                    }
+                }
+                newStartVnode = newCh[++newStartIdx]
             }
         }
         if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
@@ -197,47 +234,62 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
                 removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
             }
         }
-
     }
     function patchVnode(oldVnode: VNode, vnode: VNode) {
-        // const hook = vnode.data?.hook
-        // hook?.prepatch?.(oldVnode, vnode)
+        const hook = vnode.data?.hook
+        hook?.prepatch?.(oldVnode, vnode)
         const elm = vnode.elm = oldVnode.elm!
         const oldCh = oldVnode.children as VNode[]
         const ch = vnode.children as VNode[]
         if (oldVnode === vnode) return
         if (vnode.data !== undefined) {
             for (let i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+            vnode.data.hook?.update?.(oldVnode, vnode)
         }
         if (isUndef(vnode.text)) {
             if (isDef(oldCh) && isDef(ch)) {
                 if (oldCh !== ch) updateChildren(elm, oldCh, ch)
             } else if (isDef(ch)) {
+                if (isDef(oldVnode.text)) api.setTextContent(elm, '')
                 addVnodes(elm, null, ch, 0, ch.length - 1)
+            } else if (isDef(oldCh)) {
+                removeVnodes(elm, oldCh, 0, oldCh.length - 1)
+            } else if (isDef(oldVnode.text)) {
+                api.setTextContent(elm, '')
             }
         } else if (oldVnode.text !== vnode.text) {
+            if (isDef(oldCh)) {
+                removeVnodes(elm, oldCh, 0, oldCh.length - 1)
+            }
             api.setTextContent(elm, vnode.text!)
         }
-        // hook?.postpatch?.(oldVnode, vnode)
+        hook?.postpatch?.(oldVnode, vnode)
     }
+
     return function patch(oldVnode: VNode | Element, vnode: VNode): VNode {
         let i: number, elm: Node, parent: Node
+        for (i = 0; i < cbs.pre.length; ++i) cbs.pre[i]()
+
         if (!isVnode(oldVnode)) {
             oldVnode = emptyNodeAt(oldVnode)
         }
+
         if (sameVnode(oldVnode, vnode)) {
             patchVnode(oldVnode, vnode)
         } else {
             elm = oldVnode.elm!
             parent = api.parentNode(elm) as Node
-            
+
             createElm(vnode)
+
             if (parent !== null) {
                 api.insertBefore(parent, vnode.elm!, api.nextSibling(elm))
                 removeVnodes(parent, [oldVnode], 0, 0)
             }
-            
         }
-        return vnode;
+
+        for (i = 0; i < cbs.post.length; ++i) cbs.post[i]()
+        return vnode
     }
+
 }

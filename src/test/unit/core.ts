@@ -203,13 +203,13 @@ describe('simpledom', function () {
         //     assert.strictEqual(elm.id, 'id')
         //     assert.strictEqual(elm.className, 'class')
         // })
-        it('can create comments', function () {
-            elm = patch(vnode0, h('!', 'test')).elm
-            console.log('elm')
-            console.log(elm)
-            assert.strictEqual(elm.nodeType, document.COMMENT_NODE)
-            assert.strictEqual(elm.textContent, 'test')
-        })
+        // it('can create comments', function () {
+        //     elm = patch(vnode0, h('!', 'test')).elm
+        //     console.log('elm')
+        //     console.log(elm)
+        //     assert.strictEqual(elm.nodeType, document.COMMENT_NODE)
+        //     assert.strictEqual(elm.textContent, 'test')
+        // })
     });
     describe('patching an element', function () {
         // it('changes the elements classes', function () {
@@ -336,8 +336,6 @@ describe('simpledom', function () {
                 prevElm.appendChild(h2)
                 var nextVNode = h('div#id.class', [h('span', 'Hi')])
                 elm = patch(toVNode(prevElm), nextVNode).elm
-                console.log('elm')
-                console.log(elm)
                 assert.strictEqual(elm, prevElm)
                 assert.strictEqual(elm.tagName, 'DIV')
                 assert.strictEqual(elm.id, 'id')
@@ -346,22 +344,22 @@ describe('simpledom', function () {
                 assert.strictEqual(elm.childNodes[0].tagName, 'SPAN')
                 assert.strictEqual(elm.childNodes[0].textContent, 'Hi')
             })
-            // it('can support patching in a DocumentFragment', function () {
-            //     var prevElm = document.createDocumentFragment()
-            //     var nextVNode = vnode('', {}, [
-            //         h('div#id.class', [h('span', 'Hi')])
-            //     ], undefined, prevElm as any)
-            //     elm = patch(toVNode(prevElm), nextVNode).elm
-            //     assert.strictEqual(elm, prevElm)
-            //     assert.strictEqual(elm.nodeType, 11)
-            //     assert.strictEqual(elm.childNodes.length, 1)
-            //     assert.strictEqual(elm.childNodes[0].tagName, 'DIV')
-            //     assert.strictEqual(elm.childNodes[0].id, 'id')
-            //     assert.strictEqual(elm.childNodes[0].className, 'class')
-            //     assert.strictEqual(elm.childNodes[0].childNodes.length, 1)
-            //     assert.strictEqual(elm.childNodes[0].childNodes[0].tagName, 'SPAN')
-            //     assert.strictEqual(elm.childNodes[0].childNodes[0].textContent, 'Hi')
-            // })
+            it('can support patching in a DocumentFragment', function () {
+                var prevElm = document.createDocumentFragment()
+                var nextVNode = vnode('', {}, [
+                    h('div#id.class', [h('span', 'Hi')])
+                ], undefined, prevElm as any)
+                elm = patch(toVNode(prevElm), nextVNode).elm
+                assert.strictEqual(elm, prevElm)
+                assert.strictEqual(elm.nodeType, 11)
+                assert.strictEqual(elm.childNodes.length, 1)
+                assert.strictEqual(elm.childNodes[0].tagName, 'DIV')
+                assert.strictEqual(elm.childNodes[0].id, 'id')
+                assert.strictEqual(elm.childNodes[0].className, 'class')
+                assert.strictEqual(elm.childNodes[0].childNodes.length, 1)
+                assert.strictEqual(elm.childNodes[0].childNodes[0].tagName, 'SPAN')
+                assert.strictEqual(elm.childNodes[0].childNodes[0].textContent, 'Hi')
+            })
             // it('can remove some children of the root element', function () {
             //     var h2 = document.createElement('h2')
             //     h2.textContent = 'Hello'
