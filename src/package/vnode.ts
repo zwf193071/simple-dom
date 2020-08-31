@@ -1,3 +1,4 @@
+import { Hooks } from './hooks'
 import { Props } from './modules/props'
 import { Attrs } from './modules/attributes'
 import { Classes } from './modules/class'
@@ -19,6 +20,7 @@ export interface VNodeData {
     attrs?: Attrs
     class?: Classes
     style?: VNodeStyle
+    hook?: Hooks
     key?: Key
     ns?: string // for SVGs
     fn?: () => VNode // for thunks
