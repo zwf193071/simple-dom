@@ -1226,3 +1226,4 @@ describe('snabbdom', function () {
         })
     })
 })
+

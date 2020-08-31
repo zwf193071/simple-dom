@@ -31,6 +31,7 @@ module.exports = function (config) {
     plugins: [
       'karma-mocha',
       require('karma-mocha-reporter'),
+      require('./karma-benchmark-reporter.cjs'),
       'karma-chrome-launcher',
       'karma-firefox-launcher',
       'karma-browserstack-launcher',
@@ -69,7 +70,7 @@ module.exports = function (config) {
       stats: 'errors-only'
     },
     browserStack: {
-      name: 'SimpleDom',
+      name: 'Snabbdom',
       retryLimit: 3,
     },
     client: {
@@ -77,7 +78,7 @@ module.exports = function (config) {
     },
     browserNoActivityTimeout: 1000000,
     customLaunchers: browserstack,
-    reporters: ['mocha', 'BrowserStack'],
+    reporters: ['mocha', 'benchmark', 'BrowserStack'],
     mochaReporter: {
       showDiff: true
     },

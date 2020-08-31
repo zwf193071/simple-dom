@@ -27,6 +27,7 @@
     "jsx.ts",
     "modules/attributes.ts",
     "modules/class.ts",
+    "modules/eventlisteners.ts",
     "modules/module.ts",
     "modules/props.ts",
     "modules/style.ts",
