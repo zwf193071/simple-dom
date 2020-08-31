@@ -177,8 +177,6 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
           rm = createRmCb(ch.elm!, listeners)
           for (let i = 0; i < cbs.remove.length; ++i) cbs.remove[i](ch, rm)
           const removeHook = ch?.data?.hook?.remove
-          console.log('removeHook')
-          console.log(removeHook)
           if (isDef(removeHook)) {
               removeHook(ch, rm)
           } else {
